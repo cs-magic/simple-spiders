@@ -1,0 +1,108 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1090001,
+  "result": {
+    "translations": [
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "另一个主要的基准数据集是ICL-NUIM[130]。",
+                "ids": [
+                  0
+                ]
+              }
+            ],
+            "num_symbols": 22
+          }
+        ],
+        "quality": "normal"
+      },
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "该数据集专注于RGB-D算法，并通过八个合成的室内场景为评估三维重建提供数据。",
+                "ids": [
+                  1
+                ]
+              }
+            ],
+            "num_symbols": 26
+          }
+        ],
+        "quality": "normal"
+      },
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "一个手持式RGB-D相机生成序列，而地面实况包括一个三维表面模型和由SLAM算法估计的轨迹[131]。",
+                "ids": [
+                  2
+                ]
+              }
+            ],
+            "num_symbols": 35
+          }
+        ],
+        "quality": "normal"
+      },
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "EuRoC基准数据集[23]被广泛用于评估纯视觉和视觉-惯性SLAM和测距算法。",
+                "ids": [
+                  3
+                ]
+              }
+            ],
+            "num_symbols": 32
+          }
+        ],
+        "quality": "normal"
+      },
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "这些数据是由一个微型飞行器（MAV）在两个室内环境中收集的，它提供了11个立体图像和IMU数据的序列。",
+                "ids": [
+                  4
+                ]
+              }
+            ],
+            "num_symbols": 36
+          }
+        ],
+        "quality": "normal"
+      },
+      {
+        "beams": [
+          {
+            "sentences": [
+              {
+                "text": "地面真相是由全站仪和运动捕捉系统获得的。",
+                "ids": [
+                  5
+                ]
+              }
+            ],
+            "num_symbols": 17
+          }
+        ],
+        "quality": "normal"
+      }
+    ],
+    "target_lang": "ZH",
+    "source_lang": "EN",
+    "source_lang_is_confident": false,
+    "detectedLanguages": {}
+  }
+}

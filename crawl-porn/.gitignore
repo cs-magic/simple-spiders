@@ -1,0 +1,9 @@
+# project
+output/*
+
+# jb
+.idea
+
+# py
+venv
+
