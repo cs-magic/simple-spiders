@@ -1,15 +1,16 @@
-# _*_ coding: utf-8 _*_
-# _*_ author: anwenzen _*_
-
 import base64
 import os
 import platform
 import queue
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
 import urllib3
+
+from src.lib.string import get_name_from_url
+from src.settings import OUTPUT_DIR
 
 
 class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
@@ -17,21 +18,10 @@ class ThreadPoolExecutorWithQueueSizeLimit(ThreadPoolExecutor):
     实现多线程有界队列
     队列数为线程数的2倍
     """
-
+    
     def __init__(self, max_workers=None, *args, **kwargs):
         super().__init__(max_workers, *args, **kwargs)
         self._work_queue = queue.Queue(max_workers * 2)
-
-
-def make_sum():
-    ts_num = 0
-    while True:
-        yield ts_num
-        ts_num += 1
-
-
-PROJECT_DIR = os.path.dirname(__file__)
-OUTPUT_DIR = os.path.join(PROJECT_DIR, "output")
 
 
 class M3u8Download:
@@ -42,10 +32,16 @@ class M3u8Download:
     :param num_retries: 重试次数
     :param base64_key: base64编码的字符串
     """
-
-    def __init__(self, url, name, max_workers=64, num_retries=5, base64_key=None):
+    
+    def __init__(self, url, name=None, max_workers=64, num_retries=5, base64_key=None):
+        if not url:
+            print("not a url: ", url)
+            return
         self._url = url
-        self._name = name
+        if name:
+            self._name = name
+        else:
+            self._name = get_name_from_url(url)
         self._max_workers = max_workers
         self._num_retries = num_retries
         self._file_path = os.path.join(OUTPUT_DIR, self._name)
@@ -54,11 +50,13 @@ class M3u8Download:
         self._success_sum = 0
         self._ts_sum = 0
         self._key = base64.b64decode(base64_key.encode()) if base64_key else None
-        self._headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) \
-        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'}
-
+        self._headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) \
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'
+        }
+        
         urllib3.disable_warnings()
-
+        
         self.get_m3u8_info(self._url, self._num_retries)
         print('Downloading: %s' % self._name, 'Save path: %s' % self._file_path, sep='\n')
         with ThreadPoolExecutorWithQueueSizeLimit(self._max_workers) as pool:
@@ -68,7 +66,7 @@ class M3u8Download:
             self.output_mp4()
             self.delete_file()
             print(f"Download successfully --> {self._name}")
-
+    
     def get_m3u8_info(self, m3u8_url, num_retries):
         """
         获取m3u8信息
@@ -94,7 +92,7 @@ class M3u8Download:
             print(e)
             if num_retries > 0:
                 self.get_m3u8_info(m3u8_url, num_retries - 1)
-
+    
     def get_ts_url(self, m3u8_text_str):
         """
         获取每一个ts文件的链接
@@ -129,7 +127,7 @@ class M3u8Download:
                 f.write(new_m3u8_str.encode('gbk'))
             else:
                 f.write(new_m3u8_str.encode('utf-8'))
-
+    
     def download_ts(self, ts_url, name, num_retries):
         """
         下载 .ts 文件
@@ -157,7 +155,7 @@ class M3u8Download:
                 os.remove(name)
             if num_retries > 0:
                 self.download_ts(ts_url, name, num_retries - 1)
-
+    
     def download_key(self, key_line, num_retries):
         """
         下载key文件
@@ -186,7 +184,7 @@ class M3u8Download:
             print("加密视频,无法加载key,揭秘失败")
             if num_retries > 0:
                 self.download_key(key_line, num_retries - 1)
-
+    
     def output_mp4(self):
         """
         合并.ts文件，输出mp4格式视频，需要ffmpeg
@@ -194,13 +192,20 @@ class M3u8Download:
         cmd = f"ffmpeg -allowed_extensions ALL -i '{self._file_path}.m3u8' -acodec \
         copy -vcodec copy -f mp4 '{self._file_path}.mp4'"
         os.system(cmd)
-
+    
     def delete_file(self):
         file = os.listdir(self._file_path)
         for item in file:
             os.remove(os.path.join(self._file_path, item))
         os.removedirs(self._file_path)
         os.remove(self._file_path + '.m3u8')
+
+
+def make_sum():
+    ts_num = 0
+    while True:
+        yield ts_num
+        ts_num += 1
 
 
 def parse_multi():
@@ -216,27 +221,3 @@ def parse_multi():
             num_retries=10,
             # base64_key='5N12sDHDVcx1Hqnagn4NJg=='
         )
-
-
-if __name__ == '__main__':
-    import sys
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser(description='需要 `ffmpeg` 支持')
-
-    parser.add_argument('url',
-        help="index.m3u8 网址, e.g. https://t18.cdn2020.com:12342/video/m3u8/2022/05/21/460ca090/index.m3u8"
-    )
-    parser.add_argument('-n', '--output-name', help='如为空，则从url中提取')
-
-    args = parser.parse_args()
-
-    url = args.url
-    name = args.output_name or url.rsplit("/", 2)[1]
-    M3u8Download(
-        url,
-        name=name,
-        max_workers=64,
-        num_retries=10,
-        # base64_key='5N12sDHDVcx1Hqnagn4NJg=='
-    )

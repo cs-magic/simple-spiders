@@ -1,5 +1,8 @@
+archive
+
 # project
-output/*
+output
+out
 
 # jb
 .idea
