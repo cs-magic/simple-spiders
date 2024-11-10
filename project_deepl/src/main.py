@@ -14,10 +14,10 @@ if __name__ == '__main__':
     examples:
         [attention] you should use QUOTES to wrap all your words to translate
         1. return plain text:
-            python main.py "are you ok"
+            python download_pdf.py "are you ok"
 
         2. return json (with more info)
-            python main.py "are you ok" -f json
+            python download_pdf.py "are you ok" -f json
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
